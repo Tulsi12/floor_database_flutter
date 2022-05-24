@@ -1,6 +1,7 @@
 import 'package:floor_database/database/database_instance.dart';
 import 'package:floor_database/entities/student.dart';
 import 'package:flutter/material.dart';
+import 'package:motion_toast/motion_toast.dart';
 
 class ViewStudentScreen extends StatefulWidget {
   const ViewStudentScreen({Key? key}) : super(key: key);
@@ -14,7 +15,7 @@ class _ViewStudentScreenState extends State<ViewStudentScreen> {
     "https://www.pinclipart.com/picdir/middle/41-416584_head-clipart-student-cartoon-kids-face-png-download.png",
   ];
 
-  List<Student> lstStudents= [];
+  List<Student> lstStudents = [];
 
   @override
   void initState() {
@@ -23,11 +24,13 @@ class _ViewStudentScreenState extends State<ViewStudentScreen> {
   }
 
   _getStudents() async {
-    final database = await DatabaseInstance.instance.getDatabaseInstance();
+    try {
+      final database = await DatabaseInstance.instance.getDatabaseInstance();
       lstStudents = await database.studentDao.getAllStudents();
-    // setState(() {
-    //   lstImages = students.map((student) => student.image).toList();
-    // });
+    } catch (e) {
+      MotionToast.error(description: const Text('Error getting students'))
+          .show(context);
+    }
   }
 
   @override
@@ -37,39 +40,41 @@ class _ViewStudentScreenState extends State<ViewStudentScreen> {
         title: const Text('Student Details'),
         centerTitle: true,
       ),
-      body: const Center(
-        child: Text('View Student'),
+      body: Center(
+        child: ListView.builder(
+            itemCount: lstStudents.length,
+            itemBuilder: (context, index) {
+              return studentCard(lstStudents[index]);
+            }),
       ),
     );
   }
 
-  // Widget studentCard(Student student) {
-  //   return Card(
-  //     child: Padding(
-  //       padding: const EdgeInsets.all(8),
-  //       child: ListTile(
-  //         leading: CircleAvatar(
-  //           backgroundColor: Colors.blue,
-  //           child: Image.network(lstImages[0]),
-  //         ),
-  //         title: Text(student.fName),
-  //         subtitle: Text(student.lName),
-  //         trailing: Wrap(
-  //           children: [
-  //             IconButton(
-  //               onPressed: () {},
-  //               icon: const Icon(Icons.edit),
-  //             ),
-  //             IconButton(
-  //               onPressed: () {
-  //                 _deleteStudent(student);
-  //               },
-  //               icon: const Icon(Icons.delete),
-  //             ),
-  //           ],
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
+  Widget studentCard(Student student) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: ListTile(
+          leading: CircleAvatar(
+            backgroundColor: Colors.blue,
+            child: Image.network(lstImages[0]),
+          ),
+          title: Text(student.fName),
+          subtitle: Text(student.lName),
+          trailing: Wrap(
+            children: [
+              IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.edit),
+              ),
+              IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.delete),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
